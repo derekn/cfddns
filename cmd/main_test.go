@@ -50,6 +50,8 @@ func TestValidation(t *testing.T) {
 		{"MinimalFlags", []string{"app", "foo.bar.tld"}, false},
 		{"TokenFromFlag", []string{"app", "foo.bar.tld", "-t", "def456"}, false},
 		{"CustomDomain", []string{"app", "foo.bar.tld", "--domain", "test.tld"}, false},
+		{"RootDomain", []string{"app", "bar.tld"}, true},
+		{"RootDomainForce", []string{"app", "bar.tld", "--force"}, false},
 		{"CustomIP", []string{"app", "foo.bar.tld", "--ip", "192.168.0.1"}, false},
 		{"InvalidCustomIP", []string{"app", "foo.bar.tld", "--ip", "192.168.0.256"}, true},
 	}

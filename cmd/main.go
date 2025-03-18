@@ -33,6 +33,7 @@ var (
 	domain     string
 	ip         string
 	verbose    bool
+	force      bool
 	httpClient = &http.Client{Timeout: timeout}
 )
 
@@ -142,6 +143,9 @@ func validateArgs() error {
 			return fmt.Errorf("Error: invalid IP")
 		}
 	}
+	if record == domain && !force {
+		return fmt.Errorf("Error: --force required to update root domain")
+	}
 	return nil
 }
 
@@ -154,6 +158,7 @@ func init() {
 	flag.StringVarP(&token, "token", "t", "", "Cloudflare API token [CLOUDFLARE_API_TOKEN]")
 	flag.StringVarP(&domain, "domain", "d", "", "zone name (default record domain)")
 	flag.StringVar(&ip, "ip", "", "IP address (default automatically resolved)")
+	flag.BoolVarP(&force, "force", "f", false, "force update (required for root domain)")
 	flag.BoolVarP(&verbose, "verbose", "v", false, "verbose")
 	flag.BoolP("help", "h", false, "display usage help")
 	flag.BoolP("version", "V", false, "display version")
