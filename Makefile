@@ -19,6 +19,7 @@ $(PLATFORMS): export GOOS=$(word 1,$(subst -, ,$@))
 $(PLATFORMS): export GOARCH=$(word 2,$(subst -, ,$@))
 $(PLATFORMS):
 	@echo $(OUTPUT)
+	@$(if $(filter linux-arm,$@),export GOARM=5,)
 	@go build \
 		-C cmd \
 		-trimpath \
