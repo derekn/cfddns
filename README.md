@@ -3,7 +3,7 @@
 ![GitHub Release](https://img.shields.io/github/v/release/derekn/cfddns)
 ![GitHub License](https://img.shields.io/github/license/derekn/cfddns)
 
-An unofficial Cloudflare client for updating DNS records.
+An _unofficial_ lightweight Cloudflare DDNS client written in Go.
 
 ## Installation
 
@@ -31,6 +31,7 @@ cfddns --token xxxx record.domain.tld
 -t, --token string    Cloudflare API token [CLOUDFLARE_API_TOKEN]
 -d, --domain string   zone name (default record domain)
     --ip string       IP address (default automatically resolved)
+-f, --force           force update (required only for root domain)
 -v, --verbose         verbose
 -h, --help            display usage help
 -V, --version         display version

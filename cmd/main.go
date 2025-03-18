@@ -158,13 +158,13 @@ func init() {
 	flag.StringVarP(&token, "token", "t", "", "Cloudflare API token [CLOUDFLARE_API_TOKEN]")
 	flag.StringVarP(&domain, "domain", "d", "", "zone name (default record domain)")
 	flag.StringVar(&ip, "ip", "", "IP address (default automatically resolved)")
-	flag.BoolVarP(&force, "force", "f", false, "force update (required for root domain)")
+	flag.BoolVarP(&force, "force", "f", false, "force update (required only for root domain)")
 	flag.BoolVarP(&verbose, "verbose", "v", false, "verbose")
 	flag.BoolP("help", "h", false, "display usage help")
 	flag.BoolP("version", "V", false, "display version")
 	flag.CommandLine.SortFlags = false
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Cloudflare dynamic DNS client\n\n")
+		fmt.Fprintf(os.Stderr, "Cloudflare DDNS client\n\n")
 		fmt.Fprintf(os.Stderr, "Usage: "+appName+" [options...] <record>\n\n")
 		flag.PrintDefaults()
 	}
