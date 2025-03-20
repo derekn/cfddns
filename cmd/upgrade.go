@@ -12,7 +12,7 @@ func selfUpgrade() (bool, error) {
 	defer cancel()
 
 	updater, err := selfupdate.NewUpdater(selfupdate.Config{
-		Validator: &selfupdate.ChecksumValidator{UniqueFilename: "checksums.sha256"},
+		Validator: &selfupdate.ChecksumValidator{UniqueFilename: "SHA256SUMS"},
 	})
 	if err != nil {
 		return false, err
