@@ -15,12 +15,12 @@ update:
 	@go get -u ./cmd
 	@go mod tidy
 
+linux-arm: export GOARM=5
 $(PLATFORMS): OUTPUT=$(APP_NAME)-$@$(if $(findstring windows,$@),.exe,)
 $(PLATFORMS): export GOOS=$(word 1,$(subst -, ,$@))
 $(PLATFORMS): export GOARCH=$(word 2,$(subst -, ,$@))
 $(PLATFORMS):
-	@$(if $(filter linux-arm,$@),GOARM=5,) \
-	go build \
+	@go build \
 		-C cmd \
 		-trimpath \
 		-buildvcs=false \
@@ -33,7 +33,7 @@ build: $(CURRENT_PLATFORM)
 build-all: $(PLATFORMS)
 
 release: lint clean build-all
-	@find dist -type f ! -name '*.exe' | parallel 'bzip2 -z9v {}'
+	@find dist -type f ! -name '*.exe' | parallel 'xz -z9v {}'
 	@find dist -type f -name '*.exe' | parallel 'zip -m9 {.}.zip {}'
 	@rhash -r --printf '%{sha-256}  %f\n' dist > dist/SHA256SUMS
 	@git tag -f 'v$(VERSION)'
