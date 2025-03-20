@@ -41,9 +41,9 @@ func TestValidation(t *testing.T) {
 	testIP := os.Getenv("TEST_IP")
 
 	tests := []struct {
-		name      string
-		args      []string
-		wantError bool
+		name    string
+		args    []string
+		wantErr bool
 	}{
 		{"Empty", []string{"app"}, true},
 		{"NoToken", []string{"app", "foo.bar.tld"}, true},
@@ -67,8 +67,8 @@ func TestValidation(t *testing.T) {
 			os.Args = test.args
 			flag.Parse()
 			record = flag.Arg(0)
-			if err := validateArgs(); (err != nil) != test.wantError {
-				t.Errorf("expected %v got %v - %v", test.wantError, (err != nil), err)
+			if err := validateArgs(); (err != nil) != test.wantErr {
+				t.Errorf("expected %v got %v - %v", test.wantErr, (err != nil), err)
 			}
 
 			if test.name == "MinimalFlags" {

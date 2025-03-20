@@ -160,6 +160,7 @@ func init() {
 	flag.StringVar(&ip, "ip", "", "IP address (default automatically resolved)")
 	flag.BoolVarP(&force, "force", "f", false, "force update (required only for root domain)")
 	flag.BoolVarP(&verbose, "verbose", "v", false, "verbose")
+	flag.BoolP("upgrade", "u", false, "self-upgrade")
 	flag.BoolP("help", "h", false, "display usage help")
 	flag.BoolP("version", "V", false, "display version")
 	flag.CommandLine.SortFlags = false
@@ -182,6 +183,11 @@ func main() {
 		case "--version", "-V":
 			fmt.Printf("%s v%s %s/%s\n", appName, version, runtime.GOOS, runtime.GOARCH)
 			fmt.Printf("Copyright (C) %s Derek Nicol. Licensed under GNU GPLv3. Not affiliated with Cloudflare\n", strings.Split(version, ".")[0])
+			os.Exit(0)
+		case "--upgrade", "-u":
+			if _, err := selfUpgrade(); err != nil {
+				errExit("Error: %v", err)
+			}
 			os.Exit(0)
 		}
 	}

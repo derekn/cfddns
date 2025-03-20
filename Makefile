@@ -35,6 +35,7 @@ build-all: $(PLATFORMS)
 release: lint clean build-all
 	@find dist -type f ! -name '*.exe' | parallel 'bzip2 -z9v {}'
 	@find dist -type f -name '*.exe' | parallel 'zip -m9 {.}.zip {}'
+	@rhash -r --printf '%{sha-256}  %f\n' dist > dist/SHA256SUMS
 	@git tag -f 'v$(VERSION)'
 
 lint:

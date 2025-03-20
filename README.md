@@ -35,4 +35,5 @@ cfddns --token xxxx record.domain.tld
 -v, --verbose         verbose
 -h, --help            display usage help
 -V, --version         display version
+-u, --upgrade         self-upgrade
 ```
