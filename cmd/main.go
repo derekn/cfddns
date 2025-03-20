@@ -116,42 +116,42 @@ func updateRecord(client *cloudflare.Client, zoneID, recordID, ip string) (*dns.
 
 func validateArgs() error {
 	if record == "" {
-		return fmt.Errorf("Error: missing record")
+		return fmt.Errorf("missing record")
 	}
 	if token == "" {
 		if x := os.Getenv("CLOUDFLARE_API_TOKEN"); x == "" {
-			return fmt.Errorf("Error: missing token")
+			return fmt.Errorf("missing token")
 		} else {
 			token = x
 		}
 	}
 	if domain == "" {
 		if x, err := publicsuffix.EffectiveTLDPlusOne(record); err != nil {
-			return fmt.Errorf("Error: could not determine zone domain, use --domain")
+			return fmt.Errorf("could not determine zone domain, use --domain")
 		} else {
 			domain = x
 		}
 	}
 	if ip == "" {
 		if x, err := getIPv4(); err != nil {
-			return fmt.Errorf("Error: %w", err)
+			return err
 		} else {
 			ip = x
 		}
 	} else {
 		if err := validateIPv4(ip); err != nil {
-			return fmt.Errorf("Error: invalid IP")
+			return fmt.Errorf("invalid IP")
 		}
 	}
 	if record == domain && !force {
-		return fmt.Errorf("Error: --force required to update root domain")
+		return fmt.Errorf("--force required to update root domain")
 	}
 	return nil
 }
 
-func errExit(msg string, args ...interface{}) {
+func errExit(code int, msg string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, msg+"\n", args...)
-	os.Exit(1)
+	os.Exit(code)
 }
 
 func init() {
@@ -186,7 +186,7 @@ func main() {
 			os.Exit(0)
 		case "--upgrade", "-u":
 			if _, err := selfUpgrade(); err != nil {
-				errExit("Error: %v", err)
+				errExit(1, "Error: %v", err)
 			}
 			os.Exit(0)
 		}
@@ -194,19 +194,18 @@ func main() {
 	flag.Parse()
 	record = flag.Arg(0)
 	if err := validateArgs(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(2)
+		errExit(2, "Error: %v", err)
 	}
 
 	cf := cloudflare.NewClient(option.WithAPIToken(token), option.WithHTTPClient(httpClient))
 
 	zone, err := getZone(cf, domain)
 	if err != nil {
-		errExit("Error: %v", err)
+		errExit(1, "Error: %v", err)
 	}
 	record, err := getRecord(cf, zone.ID, record)
 	if err != nil {
-		errExit("Error: %v", err)
+		errExit(1, "Error: %v", err)
 	}
 	if record.Content == ip {
 		fmt.Println("No update needed")
@@ -220,7 +219,7 @@ func main() {
 
 	newRecord, err := updateRecord(cf, zone.ID, record.ID, ip)
 	if err != nil {
-		errExit("Error: %v", err)
+		errExit(1, "Error: %v", err)
 	}
 
 	ttl := "auto"
