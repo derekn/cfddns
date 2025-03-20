@@ -15,26 +15,26 @@ update:
 	@go get -u ./cmd
 	@go mod tidy
 
-$(PLATFORMS): OUTPUT=$(APP_NAME)-$@-$(VERSION)$(if $(findstring windows,$@),.exe,)
+$(PLATFORMS): OUTPUT=$(APP_NAME)-$@$(if $(findstring windows,$@),.exe,)
 $(PLATFORMS): export GOOS=$(word 1,$(subst -, ,$@))
 $(PLATFORMS): export GOARCH=$(word 2,$(subst -, ,$@))
 $(PLATFORMS):
-	@echo $(OUTPUT)
-	@$(if $(filter linux-arm,$@),export GOARM=5,)
-	@go build \
+	@$(if $(filter linux-arm,$@),GOARM=5,) \
+	go build \
 		-C cmd \
 		-trimpath \
 		-buildvcs=false \
-		-ldflags '-s -w -X main.version=$(VERSION)-$(GIT_COMMIT)' \
+		-ldflags '-s -w -X main.version=$(VERSION)+$(GIT_COMMIT)' \
 		-o '../dist/$(OUTPUT)'
+	@echo $(OUTPUT)
 
 build: $(CURRENT_PLATFORM)
 
 build-all: $(PLATFORMS)
 
 release: lint clean build-all
-	@find dist -type f ! -name '*.exe' | parallel 'xz -zv {}'
-	@find dist -type f -name '*.exe' | parallel 'zip -m {.}.zip {}'
+	@find dist -type f ! -name '*.exe' | parallel 'bzip2 -z9v {}'
+	@find dist -type f -name '*.exe' | parallel 'zip -m9 {.}.zip {}'
 	@git tag -f 'v$(VERSION)'
 
 lint:
