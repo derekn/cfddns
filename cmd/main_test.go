@@ -59,9 +59,9 @@ func TestValidation(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			record, token, domain, ip = "", "", "", ""
-			os.Setenv("CLOUDFLARE_API_TOKEN", "abc123")
+			_ = os.Setenv("CLOUDFLARE_API_TOKEN", "abc123")
 			if test.name == "NoToken" {
-				os.Unsetenv("CLOUDFLARE_API_TOKEN")
+				_ = os.Unsetenv("CLOUDFLARE_API_TOKEN")
 			}
 
 			os.Args = test.args

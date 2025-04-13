@@ -57,11 +57,11 @@ func getIPv4() (string, error) {
 			continue
 		}
 		if resp.StatusCode != http.StatusOK {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			continue
 		}
 		ipBytes, err := io.ReadAll(resp.Body)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		if err != nil {
 			return "", err
 		}
