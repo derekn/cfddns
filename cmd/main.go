@@ -106,7 +106,7 @@ func updateRecord(client *cloudflare.Client, zoneID, recordID, ip string) (*dns.
 
 	record, err := client.DNS.Records.Edit(context.Background(), recordID, dns.RecordEditParams{
 		ZoneID: cloudflare.F(zoneID),
-		Record: dns.ARecordParam{Content: cloudflare.F(ip)},
+		Body:   dns.ARecordParam{Content: cloudflare.F(ip)},
 	})
 	if err != nil {
 		return &dns.RecordResponse{}, err
