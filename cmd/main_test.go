@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/dns"
 	"github.com/cloudflare/cloudflare-go/v4/option"
 	"github.com/cloudflare/cloudflare-go/v4/zones"
 	"github.com/joho/godotenv"
@@ -101,6 +102,7 @@ func TestMain(t *testing.T) {
 	testRecord := os.Getenv("TEST_RECORD")
 	testZone := os.Getenv("TEST_ZONE")
 	testIP := os.Getenv("TEST_IP")
+	testUpdateIP := os.Getenv("TEST_UPDATE_IP")
 
 	domain, err := publicsuffix.EffectiveTLDPlusOne(testRecord)
 	if err != nil {
@@ -108,10 +110,10 @@ func TestMain(t *testing.T) {
 	}
 
 	var (
-		ip   string
-		zone *zones.Zone
-		// record *dns.RecordResponse
-		ok bool
+		ip     string
+		zone   *zones.Zone
+		record *dns.RecordResponse
+		ok     bool
 	)
 
 	ok = t.Run("GetIPv4", func(t *testing.T) {
@@ -144,7 +146,7 @@ func TestMain(t *testing.T) {
 		return
 	}
 
-	t.Run("GetRecord", func(t *testing.T) {
+	ok = t.Run("GetRecord", func(t *testing.T) {
 		x, err := getRecord(cf, zone.ID, testRecord)
 		if err != nil {
 			t.Fatal(err.Error())
@@ -152,6 +154,22 @@ func TestMain(t *testing.T) {
 		if x.Name != testRecord {
 			t.Fatalf("expected %q got %q", testRecord, x.Name)
 		}
-		// record = x
+		record = x
+	})
+	if !ok {
+		return
+	}
+
+	t.Run("UpdateRecord", func(t *testing.T) {
+		if testUpdateIP == "" {
+			t.Skip("TEST_UPDATE_IP not set")
+		}
+		x, err := updateRecord(cf, zone.ID, record.ID, testUpdateIP)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		if x.Content != testUpdateIP {
+			t.Fatalf("expected %q got %q", testUpdateIP, x.Content)
+		}
 	})
 }
