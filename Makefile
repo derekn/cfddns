@@ -11,7 +11,7 @@ clean:
 	@rm -rf dist/
 
 update:
-	@go get -u ./cmd
+	@go get -u ./...
 	@go mod tidy
 
 linux-arm: export GOARM=5
