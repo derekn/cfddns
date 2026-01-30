@@ -24,6 +24,8 @@ func TestValidateIPv4(t *testing.T) {
 		{"IPv6", "2001:db8::ff00:42", true},
 		{"String", "invalid", true},
 		{"Empty", "", true},
+		{"LeadingWhitespace", " 192.168.1.1", true},
+		{"TrailingWhitespace", "192.168.1.1 ", true},
 	}
 
 	for _, test := range tests {
@@ -55,6 +57,7 @@ func TestValidation(t *testing.T) {
 		{"RootDomainForce", []string{"app", "bar.tld", "--force"}, false},
 		{"CustomIP", []string{"app", "foo.bar.tld", "--ip", "192.168.0.1"}, false},
 		{"InvalidCustomIP", []string{"app", "foo.bar.tld", "--ip", "192.168.0.256"}, true},
+		{"TrailingDot", []string{"app", "foo.bar.tld."}, true},
 	}
 
 	for _, test := range tests {
@@ -93,7 +96,7 @@ func TestValidation(t *testing.T) {
 	}
 }
 
-func TestMain(t *testing.T) {
+func TestMainFunc(t *testing.T) {
 	if err := godotenv.Overload("../test.env"); err != nil {
 		panic(err)
 	}
