@@ -39,7 +39,7 @@ var (
 
 func validateIPv4(ip string) error {
 	if parsed := net.ParseIP(ip); parsed == nil || parsed.To4() == nil {
-		return fmt.Errorf("invalid IP")
+		return fmt.Errorf("invalid IPv4 address: %q", ip)
 	}
 	return nil
 }
@@ -76,10 +76,10 @@ func getIPv4() (string, error) {
 func getZone(client *cloudflare.Client, domain string) (*zones.Zone, error) {
 	zone, err := client.Zones.List(context.Background(), zones.ZoneListParams{Name: cloudflare.F(domain)})
 	if err != nil {
-		return &zones.Zone{}, err
+		return nil, err
 	}
 	if len(zone.Result) < 1 {
-		return &zones.Zone{}, fmt.Errorf("zone not found")
+		return nil, fmt.Errorf("zone not found")
 	}
 	return &zone.Result[0], nil
 }
@@ -91,17 +91,17 @@ func getRecord(client *cloudflare.Client, zoneID, name string) (*dns.RecordRespo
 		Type:   cloudflare.F(dns.RecordListParamsTypeA),
 	})
 	if err != nil {
-		return &dns.RecordResponse{}, err
+		return nil, err
 	}
 	if len(record.Result) < 1 {
-		return &dns.RecordResponse{}, fmt.Errorf("record not found")
+		return nil, fmt.Errorf("record not found")
 	}
 	return &record.Result[0], nil
 }
 
 func updateRecord(client *cloudflare.Client, zoneID, recordID, ip string) (*dns.RecordResponse, error) {
 	if ip == "" {
-		panic("empty IP")
+		return nil, fmt.Errorf("empty IP")
 	}
 
 	record, err := client.DNS.Records.Edit(context.Background(), recordID, dns.RecordEditParams{
@@ -109,7 +109,7 @@ func updateRecord(client *cloudflare.Client, zoneID, recordID, ip string) (*dns.
 		Body:   dns.ARecordParam{Content: cloudflare.F(ip)},
 	})
 	if err != nil {
-		return &dns.RecordResponse{}, err
+		return nil, err
 	}
 	return record, nil
 }
@@ -203,30 +203,30 @@ func main() {
 	if err != nil {
 		errExit(1, "Error: %v", err)
 	}
-	record, err := getRecord(cf, zone.ID, record)
+	dnsRecord, err := getRecord(cf, zone.ID, record)
 	if err != nil {
 		errExit(1, "Error: %v", err)
 	}
-	if record.Content == ip {
+	if dnsRecord.Content == ip {
 		fmt.Println("No update needed")
 		if verbose {
-			if json, err := json.MarshalIndent(record, "", "  "); err == nil {
+			if json, err := json.MarshalIndent(dnsRecord, "", "  "); err == nil {
 				fmt.Println(string(json))
 			}
 		}
 		os.Exit(0)
 	}
 
-	newRecord, err := updateRecord(cf, zone.ID, record.ID, ip)
+	newRecord, err := updateRecord(cf, zone.ID, dnsRecord.ID, ip)
 	if err != nil {
 		errExit(1, "Error: %v", err)
 	}
 
 	ttl := "auto"
 	if newRecord.TTL > 1 {
-		ttl = fmt.Sprintf("%0.0f", newRecord.TTL)
+		ttl = fmt.Sprintf("%.0f", newRecord.TTL)
 	}
-	fmt.Printf("Updated %s to %s from %s (TTL %s)\n", newRecord.Name, newRecord.Content, record.Content, ttl)
+	fmt.Printf("Updated %s to %s from %s (TTL %s)\n", newRecord.Name, newRecord.Content, dnsRecord.Content, ttl)
 	if verbose {
 		if json, err := json.MarshalIndent(newRecord, "", "  "); err == nil {
 			fmt.Println(string(json))
